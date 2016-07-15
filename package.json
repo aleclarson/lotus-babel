@@ -1,7 +1,7 @@
 {
   "name": "lotus-babel",
   "version": "1.0.0",
-  "main": "js/src/index",
+  "main": "js/index",
   "peerDependencies": {
     "lotus": "3.1.x"
   },
@@ -9,11 +9,13 @@
     "Promise": "aleclarson/Promise#1.0.0",
     "bind": "aleclarson/bind#1.0.0",
     "emptyFunction": "aleclarson/emptyFunction#1.0.0",
+    "get-value": "2.0.x",
     "hasKeys": "aleclarson/hasKeys#1.0.0",
-    "io": "aleclarson/io#1.0.0",
+    "io": "aleclarson/io#2.0.0",
     "isType": "aleclarson/isType#1.0.0",
     "log": "aleclarson/log#1.0.0",
     "mergeDefaults": "aleclarson/mergeDefaults#1.0.0",
+    "micromatch": "aleclarson/micromatch#2.3.8",
     "strip-ansi": "3.0.x",
     "sync": "aleclarson/sync#1.0.0"
   },

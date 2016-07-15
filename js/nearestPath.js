@@ -23,4 +23,4 @@ module.exports = function(name, startPath) {
   return search(startPath);
 };
 
-//# sourceMappingURL=../../map/src/nearestPath.map
+//# sourceMappingURL=map/nearestPath.map

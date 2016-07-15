@@ -1,4 +1,4 @@
-var Promise, exports, fs, hasKeys, mergeDefaults, nearestPath, path;
+var Promise, fs, hasKeys, mergeDefaults, nearestPath, path;
 
 mergeDefaults = require("mergeDefaults");
 
@@ -12,7 +12,10 @@ fs = require("io");
 
 nearestPath = require("./nearestPath");
 
-module.exports = exports = function(file, options) {
+module.exports = Promise.wrap(function(file, options) {
+  if (!file.dest) {
+    throw Error("File must have 'dest' defined before compiling: '" + file.path + "'");
+  }
   return nearestPath("package.json", file.path).then(function(pkgPath) {
     var babelPath;
     babelPath = path.dirname(pkgPath) + "/node_modules/babel-core";
@@ -40,6 +43,6 @@ module.exports = exports = function(file, options) {
       throw error;
     });
   });
-};
+});
 
-//# sourceMappingURL=../../map/src/transform.map
+//# sourceMappingURL=map/transform.map

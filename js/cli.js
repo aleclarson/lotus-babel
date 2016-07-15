@@ -1,6 +1,10 @@
-var Path, Promise, fs, isType, log, stripAnsi, sync, transform, transformFiles;
+var Promise, getValue, initModule, isMatch, isType, path, stripAnsi, sync, transform, transformFiles;
+
+isMatch = require("micromatch").isMatch;
 
 stripAnsi = require("strip-ansi");
+
+getValue = require("get-value");
 
 Promise = require("Promise");
 
@@ -8,11 +12,9 @@ isType = require("isType");
 
 sync = require("sync");
 
-Path = require("path");
+path = require("path");
 
-log = require("log");
-
-fs = require("io/sync");
+initModule = require("./initModule");
 
 transform = require("./transform");
 
@@ -20,40 +22,26 @@ module.exports = function(options) {
   var moduleName;
   moduleName = options._.shift() || ".";
   return lotus.Module.load(moduleName).then(function(module) {
-    return module.load(["config"]).then(function() {
-      var patterns;
-      try {
-        if (module.src == null) {
-          module.src = "src";
-        }
-      } catch (error1) {}
-      try {
-        if (module.spec == null) {
-          module.spec = "spec";
-        }
-      } catch (error1) {}
-      if (module.dest) {
-        if (options.refresh) {
-          fs.remove(module.dest);
-        }
-        fs.makeDir(module.dest);
+    return initModule(module).then(function(patterns) {
+      return module.crawl(patterns);
+    }).then(function(files) {
+      var config;
+      config = getValue(module.config, "lotus.babel");
+      if (config && isType(config.ignore, Array)) {
+        files = sync.filter(files, function(file) {
+          var filePath, i, len, pattern, ref;
+          filePath = path.relative(module.path, file.path);
+          ref = config.ignore;
+          for (i = 0, len = ref.length; i < len; i++) {
+            pattern = ref[i];
+            if (isMatch(filePath, pattern)) {
+              return false;
+            }
+          }
+          return true;
+        });
       }
-      if (module.specDest) {
-        if (options.refresh) {
-          fs.remove(module.specDest);
-        }
-        fs.makeDir(module.specDest);
-      }
-      patterns = [];
-      if (module.src) {
-        patterns[0] = module.src + "/**/*.js";
-      }
-      if (module.spec) {
-        patterns[1] = module.spec + "/**/*.js";
-      }
-      return module.crawl(patterns).then(function(files) {
-        return transformFiles(files, options);
-      });
+      return transformFiles(files, options);
     }).fail(function(error) {
       if (typeof error["catch"] === "function") {
         error["catch"]();
@@ -89,6 +77,15 @@ transformFiles = function(files, options) {
         return log.cyan("•");
       }
     }).fail(function(error) {
+      if (/File must have 'dest' defined before compiling/.test(error.message)) {
+        log.moat(1);
+        log.yellow("WARN: ");
+        log.white(lotus.relative(file.path));
+        log.moat(0);
+        log.gray.dim(error.message);
+        log.moat(1);
+        return;
+      }
       log.moat(1);
       log.red("Failed to compile: ");
       log.white(lotus.relative(file.path));
@@ -111,4 +108,4 @@ transformFiles = function(files, options) {
   });
 };
 
-//# sourceMappingURL=../../map/src/cli.map
+//# sourceMappingURL=map/cli.map

@@ -3,7 +3,7 @@ exports.initCommands = ->
   babel: -> require "./cli"
 
 exports.initModule = ->
-  require "./initModule"
+  require "./watchModule"
 
 exports.globalDependencies = [
   "lotus-watch"

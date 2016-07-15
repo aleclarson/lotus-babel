@@ -7,9 +7,9 @@ exports.initCommands = function() {
 };
 
 exports.initModule = function() {
-  return require("./initModule");
+  return require("./watchModule");
 };
 
 exports.globalDependencies = ["lotus-watch"];
 
-//# sourceMappingURL=../../map/src/index.map
+//# sourceMappingURL=map/index.map

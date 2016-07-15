@@ -7,8 +7,10 @@ fs = require "io"
 
 nearestPath = require "./nearestPath"
 
-module.exports =
-exports = (file, options) ->
+module.exports = Promise.wrap (file, options) ->
+
+  if not file.dest
+    throw Error "File must have 'dest' defined before compiling: '#{file.path}'"
 
   nearestPath "package.json", file.path
 

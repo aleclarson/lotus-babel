@@ -1,12 +1,14 @@
 
+{ isMatch } = require "micromatch"
+
 stripAnsi = require "strip-ansi"
+getValue = require "get-value"
 Promise = require "Promise"
 isType = require "isType"
 sync = require "sync"
-Path = require "path"
-log = require "log"
-fs = require "io/sync"
+path = require "path"
 
+initModule = require "./initModule"
 transform = require "./transform"
 
 module.exports = (options) ->
@@ -16,29 +18,23 @@ module.exports = (options) ->
   lotus.Module.load moduleName
 
   .then (module) ->
+    initModule module
 
-    module.load [ "config" ]
-
-    .then ->
-
-      try module.src ?= "src"
-      try module.spec ?= "spec"
-
-      if module.dest
-        fs.remove module.dest if options.refresh
-        fs.makeDir module.dest
-
-      if module.specDest
-        fs.remove module.specDest if options.refresh
-        fs.makeDir module.specDest
-
-      patterns = []
-      patterns[0] = module.src + "/**/*.js" if module.src
-      patterns[1] = module.spec + "/**/*.js" if module.spec
-
+    .then (patterns) ->
       module.crawl patterns
 
-      .then (files) -> transformFiles files, options
+    .then (files) ->
+
+      # Remove any ignored files.
+      config = getValue module.config, "lotus.babel"
+      if config and isType config.ignore, Array
+        files = sync.filter files, (file) ->
+          filePath = path.relative module.path, file.path
+          for pattern in config.ignore
+            return no if isMatch filePath, pattern
+          return yes
+
+      transformFiles files, options
 
     .fail (error) ->
       error.catch?()
@@ -73,6 +69,15 @@ transformFiles = (files, options) ->
         log.cyan "•"
 
     .fail (error) ->
+
+      if /File must have 'dest' defined before compiling/.test error.message
+        log.moat 1
+        log.yellow "WARN: "
+        log.white lotus.relative file.path
+        log.moat 0
+        log.gray.dim error.message
+        log.moat 1
+        return
 
       log.moat 1
       log.red "Failed to compile: "
