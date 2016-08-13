@@ -23,7 +23,9 @@ module.exports = function(options) {
   moduleName = options._.shift() || ".";
   return lotus.Module.load(moduleName).then(function(module) {
     return initModule(module).then(function(patterns) {
-      return module.crawl(patterns);
+      return module.crawl(patterns, {
+        ignore: "**/{node_modules,__tests__}/**"
+      });
     }).then(function(files) {
       var config;
       config = getValue(module.config, "lotus.babel");

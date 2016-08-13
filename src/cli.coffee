@@ -21,7 +21,8 @@ module.exports = (options) ->
     initModule module
 
     .then (patterns) ->
-      module.crawl patterns
+      module.crawl patterns,
+        ignore: "**/{node_modules,__tests__}/**"
 
     .then (files) ->
 
