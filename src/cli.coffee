@@ -22,7 +22,7 @@ module.exports = (options) ->
 
     .then (patterns) ->
       module.crawl patterns,
-        ignore: "**/{node_modules,__tests__}/**"
+        ignore: "**/{node_modules,__tests__,__mocks__}/**"
 
     .then (files) ->
 
