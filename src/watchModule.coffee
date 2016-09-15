@@ -48,7 +48,7 @@ createListeners = (config) ->
       .then (isTransformed) ->
         return next() if isTransformed
 
-        transform file # TODO: Pass in options via `module.config.lotus.babel`
+        transform file
 
         .then -> printEvent "add", file.dest
 
@@ -66,7 +66,7 @@ createListeners = (config) ->
     event = "add"
     printEvent event, file.path
 
-    transform file # TODO: Pass in options via `module.config.lotus.babel`
+    transform file
 
     .then ->
       printEvent event, file.dest
@@ -92,7 +92,7 @@ createListeners = (config) ->
     event = "change"
     printEvent event, file.path
 
-    transform file # TODO: Pass in options via `module.config.lotus.babel`
+    transform file
 
     .then ->
       printEvent event, file.dest
