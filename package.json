@@ -15,7 +15,6 @@
   "dependencies": {
     "bind": "aleclarson/bind#1.0.0",
     "emptyFunction": "aleclarson/emptyFunction#1.0.0",
-    "get-value": "2.0.x",
     "hasKeys": "aleclarson/hasKeys#1.0.0",
     "io": "aleclarson/io#2.1.0",
     "isType": "aleclarson/isType#1.0.0",

@@ -3,7 +3,6 @@
 
 emptyFunction = require "emptyFunction"
 stripAnsi = require "strip-ansi"
-getValue = require "get-value"
 isType = require "isType"
 bind = require "bind"
 sync = require "sync"
@@ -14,9 +13,7 @@ initModule = require "./initModule"
 transform = require "./transform"
 
 module.exports = (module) ->
-
-  config = getValue module.config, "lotus.babel"
-  config ?= {}
+  config = module.config.babel or {}
 
   ignoredPatterns = config.ignore
   if Array.isArray ignoredPatterns

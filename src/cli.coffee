@@ -2,7 +2,6 @@
 { isMatch } = require "micromatch"
 
 stripAnsi = require "strip-ansi"
-getValue = require "get-value"
 Promise = require "Promise"
 isType = require "isType"
 sync = require "sync"
@@ -27,7 +26,7 @@ module.exports = (options) ->
     .then (files) ->
 
       # Remove any ignored files.
-      config = getValue module.config, "lotus.babel"
+      config = module.config.babel
       if config and isType config.ignore, Array
         files = sync.filter files, (file) ->
           filePath = path.relative module.path, file.path
