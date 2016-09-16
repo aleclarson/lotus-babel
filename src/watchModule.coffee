@@ -12,23 +12,12 @@ fs = require "io/async"
 initModule = require "./initModule"
 transform = require "./transform"
 
-module.exports = (module) ->
-  config = module.config.babel or {}
-
-  ignoredPatterns = config.ignore
-  if Array.isArray ignoredPatterns
-    config.ignore = (file) ->
-      filePath = path.relative module.path, file.path
-      for pattern in ignoredPatterns
-        return no if isMatch filePath, pattern
-      return yes
-  else
-    config.ignore = emptyFunction.thatReturnsFalse
-
-  initModule module
-  .then (patterns) ->
-    listeners = createListeners config
-    module.watch patterns, listeners
+module.exports = (mod) ->
+  initModule mod
+  .then (include) ->
+    exclude = path.join "**", "{node_modules,__tests__,__mocks__}", "**"
+    listeners = createListeners mod.config.babel or {}
+    mod.watch {include, exclude}, listeners
 
 createListeners = (config) ->
 
@@ -37,10 +26,7 @@ createListeners = (config) ->
     index = -1
     next = =>
       return if ++index is files.length
-
       file = files[index]
-      return next() if config.ignore file
-
       fs.isFile file.dest
       .then (isTransformed) ->
         return next() if isTransformed
