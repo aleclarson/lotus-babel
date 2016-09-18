@@ -6,8 +6,8 @@ module.exports = (module, options = {}) ->
   module.load [ "config" ]
 
   .then ->
-    try module.src ?= "src"
-    try module.spec ?= "spec"
+    module.src ?= "src"
+    module.spec ?= "spec"
 
     if module.dest
       fs.remove module.dest if options.refresh
@@ -18,6 +18,11 @@ module.exports = (module, options = {}) ->
       fs.makeDir module.specDest
 
     patterns = []
-    patterns[0] = module.src + "/**/*.js" if module.src
-    patterns[1] = module.spec + "/**/*.js" if module.spec
+
+    if fs.isDir module.src
+      patterns.push module.src + "/**/*.js"
+
+    if fs.isDir module.spec
+      patterns.push module.spec + "/**/*.js"
+
     return patterns
