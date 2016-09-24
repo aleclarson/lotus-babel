@@ -1,16 +1,11 @@
 
-{ isMatch } = require "micromatch"
-
 emptyFunction = require "emptyFunction"
-stripAnsi = require "strip-ansi"
-isType = require "isType"
-bind = require "bind"
-sync = require "sync"
+rimraf = require "rimraf"
 path = require "path"
-fs = require "io/async"
+fs = require "fsx"
 
+transformFiles = require "./transformFiles"
 initModule = require "./initModule"
-transform = require "./transform"
 
 module.exports = (mod) ->
   initModule mod
@@ -21,96 +16,25 @@ module.exports = (mod) ->
 
 createListeners = (config) ->
 
-  ready: (files) ->
-
-    index = -1
-    next = =>
-      return if ++index is files.length
-      file = files[index]
-      fs.isFile file.dest
-      .then (isTransformed) ->
-        return next() if isTransformed
-
-        transform file
-
-        .then -> printEvent "add", file.dest
-
-        # Ignore compiler errors on startup.
-        .fail emptyFunction
-
-        # Transform the next file.
-        .then next
-
-    # Transform the first file.
-    next()
+  ready: emptyFunction
 
   add: (file) ->
-
-    event = "add"
-    printEvent event, file.path
-
-    transform file
-
-    .then ->
-      printEvent event, file.dest
-
-    .fail (error) ->
-
-      if error instanceof SyntaxError
-        return onTransformError file.path, error
-
-      if /File must have 'dest' defined before compiling/.test error.message
-        log.moat 1
-        log.yellow "WARN: "
-        log.white lotus.relative file.path
-        log.moat 0
-        log.gray.dim error.message
-        log.moat 1
-        return
-
-      throw error
+    {green} = log.color
+    log.moat 1
+    log.white """
+      File added:
+        #{green file.path}
+    """
+    log.moat 1
+    transformFiles [file]
 
   change: (file) ->
-
-    event = "change"
-    printEvent event, file.path
-
-    transform file
-
-    .then ->
-      printEvent event, file.dest
-
-    .fail (error) ->
-      if error instanceof SyntaxError
-        return onTransformError file.path, error
-      throw error
+    transformFiles [file]
 
   unlink: (file) ->
 
-    event = "unlink"
-    printEvent event, file.path
-
     if file.dest and fs.exists file.dest
-      fs.remove file.dest
-      .then -> printEvent event, file.dest
+      rimraf.sync file.dest
 
     if file.mapDest and fs.exists file.mapDest
-      fs.remove file.mapDest
-      .then -> printEvent event, file.mapDest
-
-printEvent = (event, filePath) ->
-  log.moat 1
-  log.white event, " "
-  log.yellow lotus.relative filePath
-  log.moat 1
-
-onTransformError = (filePath, error) ->
-  log.moat 1
-  log.red "Failed to compile: "
-  log.white lotus.relative filePath
-  log.moat 1
-  if error.codeFrame
-    log.gray.dim stripAnsi error.codeFrame
-  else log.gray.dim error.stack
-  log.moat 1
-  return
+      rimraf.sync file.mapDest

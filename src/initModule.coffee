@@ -1,5 +1,6 @@
 
-fs = require "io/sync"
+rimraf = require "rimraf"
+fs = require "fsx"
 
 module.exports = (module, options = {}) ->
 
@@ -10,12 +11,14 @@ module.exports = (module, options = {}) ->
     module.spec ?= "spec"
 
     if module.dest
-      fs.remove module.dest if options.refresh
-      fs.makeDir module.dest
+      if options.refresh
+        rimraf.sync module.dest
+      fs.writeDir module.dest
 
     if module.specDest
-      fs.remove module.specDest if options.refresh
-      fs.makeDir module.specDest
+      if options.refresh
+        rimraf.sync module.specDest
+      fs.writeDir module.specDest
 
     patterns = []
 
