@@ -6,8 +6,8 @@
     "lotus-coffee"
   ],
   "scripts": {
-    "build": "coffee -cb -o js src",
-    "postinstall": "postinstall-build js 'npm run build'"
+    "build": "coffee-build -v 1.11.x -b -o js src",
+    "postinstall": "npm run build"
   },
   "peerDependencies": {
     "lotus": "3.1.x"
@@ -17,12 +17,8 @@
     "fsx": "aleclarson/fsx#1.2.0",
     "mergeDefaults": "aleclarson/mergeDefaults#1.0.0",
     "objectify": "aleclarson/objectify#1.0.0",
-    "postinstall-build": "0.2.x",
     "resolve": "aleclarson/resolve#1.0.0",
     "rimraf": "2.5.x"
-  },
-  "devDependencies": {
-    "coffee-script": "1.9.x"
   },
   "implicitDependencies": [
     "path"
