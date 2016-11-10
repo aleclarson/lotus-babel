@@ -1,9 +1,13 @@
 
 {resolvePath} = require "resolve"
 
+AsyncTaskGroup = require "AsyncTaskGroup"
+emptyFunction = require "emptyFunction"
 mergeDefaults = require "mergeDefaults"
 objectify = require "objectify"
+steal = require "steal"
 path = require "path"
+mm = require "micromatch"
 fs = require "fsx"
 
 babelKeys = [
@@ -20,13 +24,12 @@ babelCache = Object.create null
 
 module.exports = (files, options = {}) ->
 
-  makePromise =
-    if options.serial
-    then Promise.chain
-    else Promise.all
-
+  tasks = AsyncTaskGroup {maxConcurrent: 3}
   failed = []
-  makePromise files, (file) ->
+
+  ignore = makeIgnoreFn options
+  tasks.map files, (file) ->
+    return if ignore file.path
     transformFile file, options
     .fail (error) ->
       failed.push {file, error}
@@ -102,3 +105,11 @@ transformFile = (file, options) ->
     dest = lotus.File file.dest, file.module
     dest.lastModified = lastModified
     return dest
+
+makeIgnoreFn = (options) ->
+  ignore = steal options, "ignore"
+  only = steal options, "only"
+  return (file) ->
+    return yes if ignore and mm.isMatch file, ignore
+    return yes if only and not mm.isMatch file, only
+    return no
