@@ -10,15 +10,15 @@
     "postinstall": "npm run build"
   },
   "peerDependencies": {
-    "lotus": "3.1.x"
+    "lotus": "3.3.x"
   },
   "dependencies": {
-    "AsyncTaskGroup": "aleclarson/AsyncTaskGroup#1.0.0",
+    "AsyncTaskGroup": "aleclarson/AsyncTaskGroup#1.0.1",
     "emptyFunction": "aleclarson/emptyFunction#1.0.0",
     "fsx": "aleclarson/fsx#1.2.0",
-    "mergeDefaults": "aleclarson/mergeDefaults#1.0.0",
+    "mergeDefaults": "aleclarson/mergeDefaults#1.0.2",
     "micromatch": "^2.3.11",
-    "objectify": "aleclarson/objectify#1.0.0",
+    "objectify": "aleclarson/objectify#1.0.1",
     "resolve": "aleclarson/resolve#1.0.0",
     "rimraf": "2.5.x",
     "steal": "aleclarson/steal#1.2.0"
