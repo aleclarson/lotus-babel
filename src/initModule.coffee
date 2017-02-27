@@ -1,23 +1,31 @@
 
-fs = require "io/sync"
+rimraf = require "rimraf"
+fs = require "fsx"
 
 module.exports = (module, options = {}) ->
 
   module.load [ "config" ]
 
   .then ->
-    try module.src ?= "src"
-    try module.spec ?= "spec"
+    module.src ?= "src"
+    module.spec ?= "spec"
 
     if module.dest
-      fs.remove module.dest if options.refresh
-      fs.makeDir module.dest
+      if options.refresh
+        rimraf.sync module.dest
+      fs.writeDir module.dest
 
     if module.specDest
-      fs.remove module.specDest if options.refresh
-      fs.makeDir module.specDest
+      if options.refresh
+        rimraf.sync module.specDest
+      fs.writeDir module.specDest
 
     patterns = []
-    patterns[0] = module.src + "/**/*.js" if module.src
-    patterns[1] = module.spec + "/**/*.js" if module.spec
+
+    if fs.isDir module.src
+      patterns.push module.src + "/**/*.js"
+
+    if fs.isDir module.spec
+      patterns.push module.spec + "/**/*.js"
+
     return patterns
