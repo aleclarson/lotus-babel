@@ -8,33 +8,31 @@ transformFiles = require "./transformFiles"
 initModule = require "./initModule"
 
 module.exports = (mod) ->
+
   initModule mod
-  .then (include) ->
-    exclude = path.join "**", "{node_modules,__tests__,__mocks__}", "**"
-    listeners = createListeners mod.config.babel or {}
-    mod.watch {include, exclude}, listeners
+  .then (patterns) ->
+    ignored = "(.git|node_modules|__tests__|__mocks__)"
 
-createListeners = (config) ->
+    watcher = mod.watch patterns,
+      ignored: path.join "**", ignored, "**"
 
-  ready: emptyFunction
+    watcher.on "add", (file) ->
+      {green} = log.color
+      log.it "File added: #{green lotus.relative file.path}"
+      transformFiles [file]
 
-  add: (file) ->
-    {green} = log.color
-    log.moat 1
-    log.white """
-      File added:
-        #{green file.path}
-    """
-    log.moat 1
-    transformFiles [file]
+    watcher.on "change", (file) ->
+      transformFiles [file]
 
-  change: (file) ->
-    transformFiles [file]
+    watcher.on "unlink", (file) ->
 
-  unlink: (file) ->
+      {red} = log.color
+      log.it "File deleted: #{red lotus.relative file.path}"
 
-    if file.dest and fs.exists file.dest
-      rimraf.sync file.dest
+      if file.dest and fs.exists file.dest
+        rimraf.sync file.dest
 
-    if file.mapDest and fs.exists file.mapDest
-      rimraf.sync file.mapDest
+      if file.mapDest and fs.exists file.mapDest
+        rimraf.sync file.mapDest
+
+    return watcher

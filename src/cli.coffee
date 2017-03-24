@@ -1,39 +1,41 @@
 
 emptyFunction = require "emptyFunction"
+path = require "path"
 
 transformFiles = require "./transformFiles"
 initModule = require "./initModule"
 
-module.exports = (options) ->
+exports.babel = (options) ->
 
-  moduleNames = options._
+  modNames = options._
 
-  if not moduleNames.length
+  unless modNames.length
     return crawlModule "."
     .then (files) ->
       transformFiles files, options
 
   allFiles = []
-  Promise.chain moduleNames, (moduleName) ->
-    return crawlModule moduleName
-    .then (files) -> allFiles = allFiles.concat files
-  .then -> transformFiles allFiles, options
+  Promise.chain modNames, (modName) ->
+    crawlModule modName
+    .then (files) ->
+      allFiles = allFiles.concat files
 
-crawlModule = (moduleName) ->
+  .then ->
+    transformFiles allFiles, options
 
-  lotus.Module.load moduleName
+crawlModule = (modName) ->
+  mod = lotus.modules.load modName
 
-  .then (module) ->
-    initModule module
+  initModule mod
+  .then (patterns) ->
+    ignored = "(.git|node_modules|__tests__|__mocks__)"
+    mod.crawl patterns,
+      ignored: path.join "**", ignored, "**"
 
-    .then (patterns) ->
-      module.crawl patterns,
-        ignore: "**/{node_modules,__tests__,__mocks__}/**"
-
-    .fail (error) ->
-      log.moat 1
-      log.red "Module error: "
-      log.white module.path
-      log.moat 0
-      log.gray.dim error.stack
-      log.moat 1
+  .fail (error) ->
+    log.moat 1
+    log.white "A module threw an error: "
+    log.red lotus.relative mod.path
+    log.moat 0
+    log.gray error.stack
+    log.moat 1
