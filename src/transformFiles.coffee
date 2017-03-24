@@ -53,7 +53,7 @@ module.exports = (files, options = {}) ->
 
 transformFile = (file, options) ->
 
-  if not file.dest
+  unless file.dest
     throw Error "File must have 'dest' defined before compiling: '#{file.path}'"
 
   lastModified = new Date
@@ -61,30 +61,20 @@ transformFile = (file, options) ->
   babelPath = resolvePath "babel-core",
     parent: path.dirname file.path
 
-  if not babelPath
+  unless babelPath
     throw Error "Could not resolve 'babel-core' from '#{file.path}'!"
 
-  if not babel = babelCache[babelPath]
+  unless babel = babelCache[babelPath]
 
-    if not options.quiet
+    unless options.quiet
       {green} = log.color
-      log.moat 1
-      log.white """
-        Importing:
-          #{green lotus.relative babelPath}
-      """
-      log.moat 1
+      log.it "Loading: #{green lotus.relative babelPath}"
 
     babelCache[babelPath] = babel = require babelPath
 
-  if not options.quiet
+  unless options.quiet
     {green} = log.color
-    log.moat 1
-    log.white """
-      Transforming:
-        #{green lotus.relative file.path}
-    """
-    log.moat 1
+    log.it "Transforming: #{green lotus.relative file.path}"
 
   babelOptions = objectify
     keys: babelKeys
